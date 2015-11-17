@@ -75,7 +75,7 @@ class Connection(object):
 
     def authorization(self, username, password):
         auth = base64.encodestring(username + ":" + password).strip()
-        self._COMMON_HEADERS.update({"Authorization": "Basic {}".format(auth)})
+        self._COMMON_HEADERS.update({"Authorization": "Basic %s" % auth})
 
     def commit(self):
         self._messages = []

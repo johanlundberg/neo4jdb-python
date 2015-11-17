@@ -78,7 +78,7 @@ def change_password():
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": "Basic {}".format(auth)
+        "Authorization": "Basic %s" % auth
     }
     con = http.HTTPConnection('localhost:7474', timeout=10)
     con.request('GET', 'http://localhost:7474/user/neo4j', headers=headers)
