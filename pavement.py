@@ -36,8 +36,8 @@ setup(
 
 BUILD_DIR = 'build'
 NEO4J_VERSION = '2.3.1'
-DEFAULT_USERNAME = 'neo4j'
-DEFAULT_PASSWORD = 'neo4j'
+DEFAULT_USERNAME = u'neo4j'
+DEFAULT_PASSWORD = u'neo4j'
 
 @task
 @needs('generate_setup', 'minilib', 'setuptools.command.sdist')
