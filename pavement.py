@@ -36,8 +36,9 @@ setup(
 
 BUILD_DIR = 'build'
 NEO4J_VERSION = '2.3.1'
-DEFAULT_USERNAME = u'neo4j'
-DEFAULT_PASSWORD = u'neo4j'
+DEFAULT_USERNAME = 'neo4j'
+DEFAULT_PASSWORD = 'neo4j'
+
 
 @task
 @needs('generate_setup', 'minilib', 'setuptools.command.sdist')
@@ -75,22 +76,28 @@ def change_password():
     """
     Changes the standard password from neo4j to testing to be able to run the test suite.
     """
-    auth = base64.encodestring(DEFAULT_USERNAME + ":" + DEFAULT_PASSWORD).strip()
+    basic_auth = '%s:%s' % (DEFAULT_USERNAME, DEFAULT_PASSWORD)
+    try:  # Python 2
+        auth = base64.encodestring(basic_auth)
+    except TypeError:  # Python 3
+        auth = base64.encodestring(bytes(basic_auth, 'utf-8')).decode()
+
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Authorization": "Basic %s" % auth
+        "Authorization": "Basic %s" % auth.strip()
     }
+    
     response = None
     retry = 0
     while not response:  # Retry if the server is not ready yet
         sleep(1)
+        con = http.HTTPConnection('localhost:7474', timeout=10)
         try:
-            con = http.HTTPConnection('localhost:7474', timeout=10)
             con.request('GET', 'http://localhost:7474/user/neo4j', headers=headers)
             response = json.loads(con.getresponse().read().decode('utf-8'))
         except ValueError:
-            pass
+            con.close()
         retry += 1
         if retry > 10:
             print("Could not change password for user neo4j")
@@ -98,5 +105,6 @@ def change_password():
     if response and response.get('password_change_required', None):
         payload = json.dumps({'password': 'testing'})
         con.request('POST', 'http://localhost:7474/user/neo4j/password', payload, headers)
+        print("Password changed for user neo4j")
     con.close()
 
