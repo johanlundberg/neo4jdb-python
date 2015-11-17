@@ -57,7 +57,7 @@ def start_server():
 
     if not path(BUILD_DIR + '/neo4j').access(os.R_OK):
         print("Unzipping Neo4j Server..")
-        call(['tar','-xf', BUILD_DIR + "/neo4j.tar.gz", '-C', BUILD_DIR])
+        call(['tar', '-xf', BUILD_DIR + "/neo4j.tar.gz", '-C', BUILD_DIR])
         os.rename(BUILD_DIR + "/neo4j-community-%s" % NEO4J_VERSION, BUILD_DIR + "/neo4j")
 
     call([BUILD_DIR + "/neo4j/bin/neo4j", "start"])
