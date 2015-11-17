@@ -2,6 +2,7 @@ import os
 import tarfile
 import base64
 import json
+from time import sleep
 from subprocess import call
 from paver.easy import *
 from paver.setuputils import setup, find_packages
@@ -80,10 +81,21 @@ def change_password():
         "Accept": "application/json",
         "Authorization": "Basic %s" % auth
     }
-    con = http.HTTPConnection('localhost:7474', timeout=10)
-    con.request('GET', 'http://localhost:7474/user/neo4j', headers=headers)
-    response = json.loads(con.getresponse().read().decode('utf-8'))
-    if response.get('password_change_required', None):
+    response = None
+    retry = 0
+    while not response:  # Retry if the server is not ready yet
+        sleep(1)
+        try:
+            con = http.HTTPConnection('localhost:7474', timeout=10)
+            con.request('GET', 'http://localhost:7474/user/neo4j', headers=headers)
+            response = json.loads(con.getresponse().read().decode('utf-8'))
+        except ValueError:
+            pass
+        retry += 1
+        if retry > 10:
+            print("Could not change password for user neo4j")
+            break
+    if response and response.get('password_change_required', None):
         payload = json.dumps({'password': 'testing'})
         con.request('POST', 'http://localhost:7474/user/neo4j/password', payload, headers)
     con.close()
